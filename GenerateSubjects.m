@@ -136,3 +136,6 @@ save( fullfile('DataStorage', data_file_name), ...
         'Subjects', 'Total_Subject_Count', 'y_thresh' );
  
 fprintf('Saved.\n');
+
+rmpath('Statistical-MEP-Model');   % IO model path
+rmpath('Functions');               % Function and LUT path
