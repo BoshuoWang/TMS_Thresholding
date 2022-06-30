@@ -1,6 +1,7 @@
 # TMS_Thresholding
 
-Repository of MATLAB code related to manuscript: B.Wang, A.V.Peterchev, and S.M.Goetz, Analysis and Comparison of Methods for Determining Transcranial Magnetic Stimulation Thresholds, 2022
+Repository of MATLAB code related to manuscript: B.Wang, A.V.Peterchev, and S.M.Goetz, Analysis and Comparison of Methods for Determining Transcranial Magnetic Stimulation Thresholds, 2022.
+bioRxiv preprint DOI https://doi.org/10.1101/2022.06.26.495134
 
 Folder "Statistical-MEP-Model" is updated version of code from repository: https://github.com/sgoetzduke/Statistical-MEP-Model
 
