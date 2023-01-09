@@ -1,8 +1,22 @@
-function batch_IFCN_MN(Batch_id, num_subj_per_batch, step_number)
+function batch_IFCN_MN(Batch_id, num_subj_per_batch, step_number, fid)
+if nargin < 4
+    fid = 1;
+end
+
+data_file_name = sprintf('IFCN_MN_batch_No%d.mat', Batch_id);
+folder_name = fullfile('DataStorage', sprintf('IFCN_MN_%dsubjperbatch', num_subj_per_batch) );
+if ~exist(folder_name, 'dir')
+    mkdir(folder_name);           % Data storage path
+end
+if exist(fullfile(folder_name, data_file_name), 'file')
+    return
+end
+
+%%
 T_batch_start = tic;
 
 D = dir('DataStorage/Subjects_*.mat');
-[~,ind] = max([D.bytes]);
+[~, ind] = max([D.bytes]);
 load( fullfile('DataStorage', D(ind).name), 'Subjects', 'Total_Subject_Count', 'y_thresh');
 
 addpath('Statistical-MEP-Model');   % IO model path
@@ -10,13 +24,13 @@ addpath('Functions');               % Function and LUT path
 
 T_subj_end = NaN(1, num_subj_per_batch);
 
-txt_fprintf = 'fprintf(''%sThreshold %7.3f%% MSO, relative difference %7.3f%%. ';
+txt_fprintf = 'fprintf(fid, ''%sThreshold %7.3f%% MSO, relative difference %7.3f%%. ';
  
 if Batch_id*num_subj_per_batch > Total_Subject_Count || Batch_id < 1
-    fprintf('Batch number %d outside of range for given batch size of %d and total number of subjects (%d).\n', Batch_id, num_subj_per_batch, Total_Subject_Count);
+    fprintf(fid, 'Batch number %d outside of range for given batch size of %d and total number of subjects (%d).\n', Batch_id, num_subj_per_batch, Total_Subject_Count);
     return
 else
-    fprintf('Running batch No. %d, subjects No. %d to %d. \n', Batch_id, (Batch_id -1) * num_subj_per_batch + 1, num_subj_per_batch * Batch_id)
+    fprintf(fid, 'Running batch No. %d, subjects No. %d to %d. \n', Batch_id, (Batch_id -1) * num_subj_per_batch + 1, num_subj_per_batch * Batch_id);
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -29,9 +43,9 @@ params.opts = optimset('Display', 'off', 'MaxFunEvals', 500000, 'FunValCheck', '
 %  Main Loop:
 for subj_cnt = num_subj_per_batch : -1 : 1        % Reverse loop, elimitnate need to pre-allocate space for many variables
     T_subj_start = tic;
-    subj_id = subj_cnt + (Batch_id -1) * num_subj_per_batch;
-    fprintf('\n========================================================================\n')
-    fprintf('\tSubject %03d -- %s\n', subj_id, datestr(now));
+    subj_id = subj_cnt + (Batch_id - 1) * num_subj_per_batch;
+    fprintf(fid, '\n========================================================================\n');
+    fprintf(fid, '\tSubject %03d -- %s\n', subj_id, datetime('now'));
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %   Subject parameters and threshold
@@ -50,7 +64,7 @@ for subj_cnt = num_subj_per_batch : -1 : 1        % Reverse loop, elimitnate nee
        T_algo_start = tic;
        eval(sprintf('IFCN%d(subj_cnt) = IFCNmethod(params, version);', version));
        T_algo_end = toc(T_algo_start);
-       fprintf('\t\tIFCN version %d: %02d:%02d.%03d.\n\t\t\t', version, fix(T_algo_end/60) , fix(mod(T_algo_end,60)), fix(mod(T_algo_end*1000,1000)) );
+       fprintf(fid, '\t\tIFCN version %d: %02d:%02d.%03d.\n\t\t\t', version, fix(T_algo_end/60) , fix(mod(T_algo_end,60)), fix(mod(T_algo_end*1000,1000)) );
        
        eval(sprintf('%s\\n'', %s, %s, %s );', txt_fprintf, '''''', ...
            sprintf('IFCN%d(subj_cnt).th_est', version), ...
@@ -69,38 +83,34 @@ for subj_cnt = num_subj_per_batch : -1 : 1        % Reverse loop, elimitnate nee
        T_algo_start = tic;
        eval(sprintf('MillsNithi%d(subj_cnt) = MillsNithiMethod(params, version);', version));
        T_algo_end = toc(T_algo_start);
-       fprintf('\t\tMills-Nithi version %d: %02d:%02d.%03d.\n\t\t\t', version, fix(T_algo_end/60) , fix(mod(T_algo_end,60)), fix(mod(T_algo_end*1000,1000)) );
+       fprintf(fid, '\t\tMills-Nithi version %d: %02d:%02d.%03d.\n\t\t\t', version, fix(T_algo_end/60) , fix(mod(T_algo_end,60)), fix(mod(T_algo_end*1000,1000)) );
        
-       eval(sprintf('%s\\n'', %s, %s, %s );', txt_fprintf, '''''', ...
+       eval(sprintf('%s\\n'', %s, %s * 100, %s );', txt_fprintf, '''''', ...
            sprintf('MillsNithi%d(subj_cnt).th_est', version), ...
            sprintf('MillsNithi%d(subj_cnt).rel_err', version)));
    end
    
     %% %%%%%%%%%%%%%%%%%%%%%%%
     T_subj_end(subj_cnt) = toc(T_subj_start);
-    T_run_min = nansum(T_subj_end)/60;
-    T_rem_min_est = num_subj_per_batch * nanmean(T_subj_end)/60 - T_run_min;
-    fprintf('\tSubject %03d:%3d:%02d:%06.3f.\tRun time: %3d hours %04.1f minutes.\n', subj_id, ...
-            floor(T_subj_end(subj_cnt)/3600), floor(mod(T_subj_end(subj_cnt)/60, 60)), mod(T_subj_end(subj_cnt),60), ...
+    T_run_min = sum(T_subj_end, 'omitnan')/60;
+    T_subj_end_ave = mean(T_subj_end, 'omitnan');
+    T_rem_min_est = num_subj_per_batch * T_subj_end_ave/60 - T_run_min;
+    fprintf(fid, '\tSubject %03d:%3d:%02d:%06.3f.\tRun time: %3d hours %04.1f minutes.\n', subj_id, ...
+            floor(T_subj_end(subj_cnt)/3600), floor(mod(T_subj_end(subj_cnt)/60, 60)), mod(T_subj_end(subj_cnt), 60), ...
             floor(T_run_min/60), mod(T_run_min,60));
-    fprintf('\tAverage: %3d:%02d:%06.3f.\n',...
-            floor(nanmean(T_subj_end)/3600),  floor(mod(nanmean(T_subj_end)/60, 60)),  mod(nanmean(T_subj_end),60));
+    fprintf(fid, '\tAverage: %3d:%02d:%06.3f.\n',...
+            floor(T_subj_end_ave/3600),  floor(mod(T_subj_end_ave/60, 60)),  mod(T_subj_end_ave, 60));
     if subj_cnt > 1
-        fprintf('\tRemaining subjects: %3d.\tRemaining time: %3d hours %04.1f minutes (estimated).\n', subj_cnt-1, ...
-            floor(T_rem_min_est/60), mod(T_rem_min_est,60) );
+        fprintf(fid, '\tRemaining subjects: %3d.\tRemaining time: %3d hours %04.1f minutes (estimated).\n', subj_cnt-1, ...
+            floor(T_rem_min_est/60), mod(T_rem_min_est, 60) );
     end
 end
     
 T_batch_end = toc(T_batch_start);
-fprintf('\n\nTotal computation time: %2dD %02d:%02d:%06.3f.\n\nSaving data...', ...
+fprintf(fid, '\n\nTotal computation time: %2dD %02d:%02d:%06.3f.\n\nSaving data...', ...
         floor(T_batch_end/3600/24), floor(mod(T_batch_end/3600,24)), floor(mod(T_batch_end/60,60)), mod(T_batch_end,60));
-    
-data_file_name = sprintf('IFCN_MN_batch_No%d.mat', Batch_id);
-folder_name = fullfile('DataStorage',sprintf('IFCN_MN_%dsubjperbatch', num_subj_per_batch) );
-if ~exist(folder_name,'dir')
-    mkdir(folder_name);           % Data storage path
-end
+
 save( fullfile(folder_name, data_file_name), 'IFCN*', 'MillsNithi*' );
-fprintf('Saved.\n');
+fprintf(fid, 'Saved.\n');
 
 end

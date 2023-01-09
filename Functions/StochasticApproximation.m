@@ -1,16 +1,17 @@
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   StochasticApproximation, Robbins-Monro, fully log, all versions
-%   Version 1, 2:       non-adaptive 1/i, 1st & 2nd order (original versions 9, 10)
-%   Version 3, 4:       adaptive 1/i, 1st & 2nd order (original versions 1/11/81, 2)
-%   Version 5, 6:       adaptive 2^(-i), 1st & 2nd order (original versions 3, 4)
-%   Version 7, 8:       adaptive 2^(-i/2), 1st & 2nd order (original versions 5/15, 6)
-%   Version 9, 10:      adaptive 2^(-i/2), 1st & 2nd order, de- and increasing steps (original versions 7, 8)
-%   Version 11, 12:     adaptive 1/i, 1st & 2nd order, step increases if plateau reached (original version 21)
-%   Version 13:         Stochastic Newton, starts as RM (adaptive 1/i, 1st order) until robust estimation with linear regression (orginal version snewta)
-%   Version 7-3:        adaptive 2^(-i/2) switches to 1/i, 1st order i.e., rapid approach switching to a.s. convergence. Transition: max step stize < +/- 0.015 = 1.5% MSO (original version 151)
+%   Version 1, 2:       non-adaptive 1/i, 1st & 2nd order, ACS1-H, DCS1-H, ACS2-H           (naming in 2022 Jun. preprint: ACS1-N, DCS1-N, ACS2-N; versions 9, 10 prior to 2019)
+%   Version 3, 4:       adaptive 1/i, 1st & 2nd order, ACS1-HA, DCS1-HA, ACS2-HA            (naming in 2022 Jun. preprint: ACS1, DCS1, ACS2; versions 1/11/81, 2 prior to 2019)
+%   Version 5, 6:       adaptive 2^(-i), 1st & 2nd order                                    (naming in 2022 Jun. preprint: ACS5, DCS5, ACS6; versions 3, 4 prior to 2019)
+%   Version 7, 8:       adaptive 2^(-i/2), 1st & 2nd order, ACS1-GA, DCS1-GA, ACS2-GA       (naming in 2022 Jun. preprint: ACS3, DCS3, ACS4; versions 5/15, 6 prior to 2019)
+%   Version 9, 10:      adaptive 2^(-i/2), 1st & 2nd order, de- and increasing steps        (not used in preprint, versions 7, 8 prior to 2019)
+%   Version 11, 12:     adaptive 1/i, 1st & 2nd order, step increases if plateau reached    (not used in preprint, version 21 prior to 2019)
+%   Version 13:         Stochastic Newton, starts as RM (adaptive 1/i, 1st order) until robust estimation with linear regression (not used in preprint, orginal version snewta)
+%   Version 7-3:        adaptive 2^(-i/2) switches to 1/i, 1st order i.e., rapid approach switching to a.s. convergence. 
+%                       Transition: max step stize < +/- 0.015 = 1.5% MSO. ACS1-GHA         (naming in 2022 Jun. preprint: ACS3-1; versions 151 prior to 2019)
 
-%  StochasticApproximation(params, version, is_analog, num_start_conditions, num_second_order_weights, run_lin, run_MLE)
-%  Default argin after params: 1, true, 1, 1, false, false
+%   StochasticApproximation(params, version, is_analog, num_start_conditions, num_second_order_weights, run_lin, run_MLE)
+%   Default argin after params: 1, true, 1, 1, false, false
 
 %   Estimate derivative with robust linear regression
 %   Run MLE in parallel
@@ -72,13 +73,14 @@ response_bin = false(step_number, num_conditions);
 if is_analog
     response_list = NaN(step_number, num_conditions);
 end
+run_time = NaN(step_number, 1);
 
 % delta_ctrl_seq = zeros(1, num_conditions);
 delta_Y = zeros(step_number, num_conditions);
 
 stochastic_mode = true(step_number, 1);
 
-amplitude_list(1, :) = params.start_amplitude;
+amplitude_list(1, :) = min(params.start_amplitude, 1.3);
 
 % (compensating that saturation reduces the error term and thus the drive to go back to the threshold)
 cutoff_low = 10e-6;            % 10 µV. below that, the step size is increased again 
@@ -109,6 +111,7 @@ end
 
 
 for step_cnt = 1 : step_number
+    T_start = tic;
     response =  virtstimulate(amplitude_list(step_cnt, :), params.subj_parameters) ;
     % response > 0; real function is already taken in virtstimulate
     response_bin(step_cnt, :) = logical(response >= y_thresh);
@@ -246,13 +249,14 @@ for step_cnt = 1 : step_number
             amplitude_list(step_cnt+1, :) = amplitude_list(step_cnt+1, :) - ...
                                             control_sequence(step_cnt, :) .* (second_order_weights(:)' .* delta_Y(step_cnt-1, :) ) ; 
         end
-        amplitude_list(step_cnt+1, :) = max(0, amplitude_list(step_cnt+1, :)); % no negative stimuli
+        amplitude_list(step_cnt+1, :) = min(max(0, amplitude_list(step_cnt+1, :)), 1.3); % no negative stimuli, maximum clipped to 130% MSO
     else
         amplitude_list(step_cnt+1) = lin_estim(step_cnt);
     end
+    run_time(step_cnt) = toc(T_start)/num_conditions;
 end
 
-
+result.run_time = run_time;
 result.control_sequence = squeeze(reshape(control_sequence, [step_number, num_start_conditions, num_second_order_weights]));
 result.amplitude_list = squeeze(reshape(amplitude_list, [step_number+1, num_start_conditions, num_second_order_weights]));
 result.step_size = squeeze(reshape(cat(1, zeros(1, num_conditions), diff(amplitude_list)), [step_number+1, num_start_conditions, num_second_order_weights]));
