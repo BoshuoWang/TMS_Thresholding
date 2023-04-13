@@ -1,23 +1,15 @@
 function batch_RM(Batch_id, num_subj_per_batch, step_number, version, fid)
-if nargin < 4
+if nargin <= 4
     fid = 1;
 end
-
-data_file_name = sprintf('RobMon_v%d_No%d.mat', version, Batch_id);
-folder_name = fullfile('DataStorage',sprintf('RobMon_%dsubjperbatch', num_subj_per_batch) );
-if ~exist(folder_name, 'dir')
-    mkdir(folder_name);           % Data storage path
-end
-if exist(fullfile(folder_name, data_file_name), 'file')
-    return
-end
-
-%%
 T_batch_start = tic;
 
-D = dir('DataStorage/Subjects_*.mat');
-[~,ind] = max([D.bytes]);
-load( fullfile('DataStorage', D(ind).name), 'Subjects', 'Total_Subject_Count', 'y_thresh');
+data_folder = 'DataStorage';
+if ~exist('Total_Subject_Count', 'var')
+    Total_Subject_Count = 25e3;    % 25k
+end
+file_name = fullfile(data_folder, sprintf('Subjects_%d_reprocessed.mat', Total_Subject_Count));
+load( file_name, 'Subjects', 'Total_Subject_Count', 'y_thresh');
 
 addpath('Statistical-MEP-Model');   % IO model path
 addpath('Functions');               % Function and LUT path
@@ -51,8 +43,8 @@ for subj_cnt = num_subj_per_batch : -1 : 1        % Reverse loop, elimitnate nee
     %   Subject parameters and threshold
     %   Generate paramameters for subject
     params.subj_parameters = Subjects(subj_id).subj_parameters;
-    params.start_amplitude = Subjects(subj_id).start_amplitude;
-    params.thresh_x = Subjects(subj_id).thresh_x;
+    params.start_amplitude = Subjects(subj_id).p95_start.amplitude;
+    params.thresh_x = Subjects(subj_id).relative_frequency.p50_lin;
         
     %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %   Stochastic Approximation, Robbins-Monro, fully log, all versions
@@ -68,7 +60,7 @@ for subj_cnt = num_subj_per_batch : -1 : 1        % Reverse loop, elimitnate nee
     is_analog = true;
             
     switch version
-        case {1, 5, 7, 9, 73, 11}
+        case {1, 5, 7, 73, 9, 11}
             num_start_conditions = 21;
             
             T_algo_start = tic;
@@ -86,16 +78,16 @@ for subj_cnt = num_subj_per_batch : -1 : 1        % Reverse loop, elimitnate nee
             end
             
         case {3}
-            num_start_conditions = 1;
-            num_second_order_weights = 1;
-            run_lin = true;
-            run_MLE = true;
-            
-            T_algo_start = tic;
-            RobMonA3(subj_cnt) = StochasticApproximation(params, version, is_analog, num_start_conditions, num_second_order_weights, run_lin, run_MLE);
-            T_algo_end = toc(T_algo_start);
-            fprintf(fid, '\t\tRobbins-Monro analog version %d: %02d:%02d.%03d.\n', version, fix(T_algo_end/60) , fix(mod(T_algo_end,60)), fix(mod(T_algo_end*1000,1000)) );
-            
+%             num_start_conditions = 1;
+%             num_second_order_weights = 1;
+%             run_lin = true;
+%             run_MLE = true;
+%             
+%             T_algo_start = tic;
+%             RobMonA3(subj_cnt) = StochasticApproximation(params, version, is_analog, num_start_conditions, num_second_order_weights, run_lin, run_MLE);
+%             T_algo_end = toc(T_algo_start);
+%             fprintf(fid, '\t\tRobbins-Monro analog version %d: %02d:%02d.%03d.\n', version, fix(T_algo_end/60) , fix(mod(T_algo_end,60)), fix(mod(T_algo_end*1000,1000)) );
+%             
             is_analog = false;
             num_start_conditions = 21;
             T_algo_start = tic;
@@ -152,6 +144,12 @@ T_batch_end = toc(T_batch_start);
 fprintf(fid, '\n\nTotal computation time: %2dD %02d:%02d:%06.3f.\n\nSaving data...', ...
         floor(T_batch_end/3600/24), floor(mod(T_batch_end/3600,24)), floor(mod(T_batch_end/60,60)), mod(T_batch_end,60));
     
+data_file_name = sprintf('RobMon_v%d_No%d.mat', version, Batch_id);
+folder_name = fullfile('DataStorage',sprintf('RobMon_%dsubjperbatch', num_subj_per_batch) );
+if ~exist(folder_name,'dir')
+    mkdir(folder_name);           % Data storage path
+end
+
 save( fullfile(folder_name, data_file_name), 'RobMon*', '-v7.3');
 fprintf(fid, 'Saved.\n');
 

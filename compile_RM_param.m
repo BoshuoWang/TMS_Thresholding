@@ -1,7 +1,7 @@
 function compile_RM_param(version, is_analog, num_subj_per_batch, num_files)
 data_folder = 'DataStorage';
 
-fprintf('Retrieving RM param data from: %s\n',data_folder);
+fprintf('Retrieving RM param data for version %d from: %s\n', version, data_folder);
 
 if nargin <= 2
     num_subj_per_batch = 100;
@@ -123,6 +123,6 @@ T = toc(Tdata);
 fprintf('Time for saving results of individual parameters: %f s.\n\n', T);
 save(fullfile(data_folder, sprintf('Compiled_%dsubjs_%s_err_stat.mat', num_subj_per_batch*num_files, data_name)),...
     '*_err_stat', 'param_num', 'param_num_s', 'param_num_w');
-fprintf('\tSaved error stat.\n');
+fprintf('\tSaved error stat.\n\n');
    
 end

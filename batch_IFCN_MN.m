@@ -2,22 +2,15 @@ function batch_IFCN_MN(Batch_id, num_subj_per_batch, step_number, fid)
 if nargin < 4
     fid = 1;
 end
-
-data_file_name = sprintf('IFCN_MN_batch_No%d.mat', Batch_id);
-folder_name = fullfile('DataStorage', sprintf('IFCN_MN_%dsubjperbatch', num_subj_per_batch) );
-if ~exist(folder_name, 'dir')
-    mkdir(folder_name);           % Data storage path
-end
-if exist(fullfile(folder_name, data_file_name), 'file')
-    return
-end
-
-%%
 T_batch_start = tic;
 
-D = dir('DataStorage/Subjects_*.mat');
-[~, ind] = max([D.bytes]);
-load( fullfile('DataStorage', D(ind).name), 'Subjects', 'Total_Subject_Count', 'y_thresh');
+data_folder = 'DataStorage';
+if ~exist('Total_Subject_Count', 'var')
+    Total_Subject_Count = 25e3;    % 25k
+end
+file_name = fullfile(data_folder, sprintf('Subjects_%d_reprocessed.mat', Total_Subject_Count));
+load( file_name, 'Subjects', 'Total_Subject_Count', 'y_thresh');
+
 
 addpath('Statistical-MEP-Model');   % IO model path
 addpath('Functions');               % Function and LUT path
@@ -51,8 +44,8 @@ for subj_cnt = num_subj_per_batch : -1 : 1        % Reverse loop, elimitnate nee
     %   Subject parameters and threshold
     %   Generate paramameters for subject
     params.subj_parameters = Subjects(subj_id).subj_parameters;
-    params.start_amplitude = Subjects(subj_id).start_amplitude;
-    params.thresh_x = Subjects(subj_id).thresh_x;
+    params.start_amplitude = Subjects(subj_id).p95_start.amplitude;
+    params.thresh_x = Subjects(subj_id).relative_frequency.p50_lin;
     
    %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%
    %   IFCN 
@@ -109,7 +102,12 @@ end
 T_batch_end = toc(T_batch_start);
 fprintf(fid, '\n\nTotal computation time: %2dD %02d:%02d:%06.3f.\n\nSaving data...', ...
         floor(T_batch_end/3600/24), floor(mod(T_batch_end/3600,24)), floor(mod(T_batch_end/60,60)), mod(T_batch_end,60));
-
+    
+data_file_name = sprintf('IFCN_MN_batch_No%d.mat', Batch_id);
+folder_name = fullfile('DataStorage', sprintf('IFCN_MN_%dsubjperbatch', num_subj_per_batch) );
+if ~exist(folder_name, 'dir')
+    mkdir(folder_name);           % Data storage path
+end
 save( fullfile(folder_name, data_file_name), 'IFCN*', 'MillsNithi*' );
 fprintf(fid, 'Saved.\n');
 

@@ -7,6 +7,8 @@
 %   Version 9, 10:      adaptive 2^(-i/2), 1st & 2nd order, de- and increasing steps        (not used in preprint, versions 7, 8 prior to 2019)
 %   Version 11, 12:     adaptive 1/i, 1st & 2nd order, step increases if plateau reached    (not used in preprint, version 21 prior to 2019)
 %   Version 13:         Stochastic Newton, starts as RM (adaptive 1/i, 1st order) until robust estimation with linear regression (not used in preprint, orginal version snewta)
+%   Version 5-3:        adaptive 2^(-i) switches to 1/i, 1st order i.e., rapid approach switching to a.s. convergence. 
+%                       Transition: max step stize < +/- 0.015 = 1.5% MSO. ACS1-GHA         
 %   Version 7-3:        adaptive 2^(-i/2) switches to 1/i, 1st order i.e., rapid approach switching to a.s. convergence. 
 %                       Transition: max step stize < +/- 0.015 = 1.5% MSO. ACS1-GHA         (naming in 2022 Jun. preprint: ACS3-1; versions 151 prior to 2019)
 
@@ -100,9 +102,13 @@ switch version
     case {3,4, 11,12, 13,14}
         number_of_sign_changes = zeros(1, num_conditions);
     case {5,6}
-        b_i = 2 ;
+        b_i = 2;
     case {7,8, 9,10}
         b_i = sqrt(2);
+    case {53,54}
+        b_i = 2;
+        as_convergence = false(1, num_conditions);   % false: geometric; true: harmonic
+        number_of_sign_changes = zeros(1, num_conditions);
     case {73,84}
         b_i = sqrt(2);
         as_convergence = false(1, num_conditions);   % false: geometric; true: harmonic
@@ -168,7 +174,7 @@ for step_cnt = 1 : step_number
                 number_of_sign_changes = number_of_sign_changes + sign_change;              % none-zero for those with sign changes
                 control_sequence(step_cnt,  sign_change) = control_sequence(step_cnt-1,  sign_change) .* number_of_sign_changes(sign_change)./ (number_of_sign_changes(sign_change) + 1);
             end
-        case {5,6,7,8}      % overall: ~2^(-i) or ~2^(-i/2), only in case of sign change, original version III, IV
+        case {5,6,7,8}      % overall: ~2^(-i/3) or ~2^(-i/2), only in case of sign change, original version III, IV
             if step_cnt == 1
                 control_sequence(step_cnt, :) = start_ctrl_seqs(:)';
             else % step_cnt > 1
@@ -217,7 +223,7 @@ for step_cnt = 1 : step_number
                 end
             end
             
-        case {73,84}	% Controlling sequence in the beginning: sqrt(1/2)^n; only in case of sign change)
+        case {53,54, 73,84}	% Controlling sequence in the beginning: ~2^(-i/3) or ~2^(-i/2); only in case of sign change)
             % switches to 1/n as soon as max expected step size < +/- 1.5% MSO
             if step_cnt == 1
                 control_sequence(step_cnt, :) = start_ctrl_seqs(:)';

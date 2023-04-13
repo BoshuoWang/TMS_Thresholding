@@ -1,11 +1,15 @@
-function compile_RM_nonparam(version, num_subj_per_batch, num_files)
+function compile_RM_nonparam(version, num_subj_per_batch, num_files, is_analog)
 data_folder = 'DataStorage';
 
 fprintf('Retrieving RM data from: %s\n',data_folder);
 
 if nargin == 1
     num_subj_per_batch = 100;
-    num_files = 250;
+    num_files = 50;
+    is_analog = true;
+end
+if nargin < 3
+    is_analog = true;
 end
 step_number = 200;
 
@@ -16,9 +20,10 @@ var_name =  'RobMon*';
 for Batch_id = num_files : -1 : 1
     ind = (1 : num_subj_per_batch) + (Batch_id -1) * num_subj_per_batch ;
 
-    data_file_name = sprintf('RobMon_v%d_No%d.mat', version, Batch_id);
-    Data = load( fullfile(folder_name, data_file_name), var_name);
-
+    if ~(version == 3)
+        data_file_name = sprintf('RobMon_v%d_No%d.mat', version, Batch_id);
+        Data = load( fullfile(folder_name, data_file_name), var_name);
+    end
 
     switch version
         case {1, 5, 7, 9, 73, 11}
@@ -33,25 +38,29 @@ for Batch_id = num_files : -1 : 1
                 eval(sprintf('RobMonD%d_run_time(ind, 1 : step_number) = cell2mat({Data.RobMonD%d_s.run_time})'';', version, version));
             end
         case {3}
-            eval(sprintf('RobMonA%d_MLE_abs_err(ind, 1 : step_number)  = cell2mat({Data.RobMonA%d.MLE_abs_err})'';', version, version));
-            eval(sprintf('RobMonA%d_MLE_rel_err(ind, 1 : step_number)  = cell2mat({Data.RobMonA%d.MLE_rel_err})'';', version, version));
-            eval(sprintf('RobMonA%d_lin_abs_err(ind, 1 : step_number)  = cell2mat({Data.RobMonA%d.lin_abs_err})'';', version, version));
-            eval(sprintf('RobMonA%d_lin_rel_err(ind, 1 : step_number)  = cell2mat({Data.RobMonA%d.lin_rel_err})'';', version, version));
-
-            num_start_conditions = 21;
-            ind_start_conditions = (num_start_conditions+1)/2;
-            eval(sprintf('RobMonD%d_abs_err(ind, 1 : step_number +1) = cell2mat(cellfun(@(x) x(:,ind_start_conditions), {Data.RobMonD%d_s.abs_err},''UniformOutput'',false))'';', version, version));
-            eval(sprintf('RobMonD%d_rel_err(ind, 1 : step_number +1) = cell2mat(cellfun(@(x) x(:,ind_start_conditions), {Data.RobMonD%d_s.rel_err},''UniformOutput'',false))'';', version, version));
-            eval(sprintf('RobMonD%d_run_time(ind, 1 : step_number) = cell2mat({Data.RobMonD%d_s.run_time})'';', version, version));
-
-            data_file_name = sprintf('RobMon_v%d_No%d.mat', version+1, Batch_id);
-            Data = load( fullfile(folder_name, data_file_name), var_name);
-            num_second_order_weights = 41;
-            ind_second_order_weights = (num_second_order_weights+1)/2;
-            RobMonA3_abs_err(ind, 1 : step_number +1) = cell2mat(cellfun(@(x) x(:,ind_start_conditions, ind_second_order_weights),cellfun(@squeeze,{Data.RobMonA4_sw.abs_err},'UniformOutput',false),'UniformOutput',false))';
-            RobMonA3_rel_err(ind, 1 : step_number +1) = cell2mat(cellfun(@(x) x(:,ind_start_conditions, ind_second_order_weights),cellfun(@squeeze,{Data.RobMonA4_sw.rel_err},'UniformOutput',false),'UniformOutput',false))';
-            RobMonA3_run_time(ind, 1 : step_number) = cell2mat({Data.RobMonA4_sw.run_time})';
-
+%             eval(sprintf('RobMonA%d_MLE_abs_err(ind, 1 : step_number)  = cell2mat({Data.RobMonA%d.MLE_abs_err})'';', version, version));
+%             eval(sprintf('RobMonA%d_MLE_rel_err(ind, 1 : step_number)  = cell2mat({Data.RobMonA%d.MLE_rel_err})'';', version, version));
+%             eval(sprintf('RobMonA%d_lin_abs_err(ind, 1 : step_number)  = cell2mat({Data.RobMonA%d.lin_abs_err})'';', version, version));
+%             eval(sprintf('RobMonA%d_lin_rel_err(ind, 1 : step_number)  = cell2mat({Data.RobMonA%d.lin_rel_err})'';', version, version));
+            if ~(is_analog)
+                data_file_name = sprintf('RobMon_v%d_No%d.mat', version, Batch_id);
+                Data = load( fullfile(folder_name, data_file_name), var_name);
+                num_start_conditions = 21;
+                ind_start_conditions = (num_start_conditions+1)/2;
+                eval(sprintf('RobMonD%d_abs_err(ind, 1 : step_number +1) = cell2mat(cellfun(@(x) x(:,ind_start_conditions), {Data.RobMonD%d_s.abs_err},''UniformOutput'',false))'';', version, version));
+                eval(sprintf('RobMonD%d_rel_err(ind, 1 : step_number +1) = cell2mat(cellfun(@(x) x(:,ind_start_conditions), {Data.RobMonD%d_s.rel_err},''UniformOutput'',false))'';', version, version));
+                eval(sprintf('RobMonD%d_run_time(ind, 1 : step_number) = cell2mat({Data.RobMonD%d_s.run_time})'';', version, version));
+            else
+                data_file_name = sprintf('RobMon_v%d_No%d.mat', version+1, Batch_id);
+                Data = load( fullfile(folder_name, data_file_name), var_name);
+                num_start_conditions = 21;
+                ind_start_conditions = (num_start_conditions+1)/2;
+                num_second_order_weights = 41;
+                ind_second_order_weights = (num_second_order_weights+1)/2;
+                RobMonA3_abs_err(ind, 1 : step_number +1) = cell2mat(cellfun(@(x) x(:,ind_start_conditions, ind_second_order_weights),cellfun(@squeeze,{Data.RobMonA4_sw.abs_err},'UniformOutput',false),'UniformOutput',false))';
+                RobMonA3_rel_err(ind, 1 : step_number +1) = cell2mat(cellfun(@(x) x(:,ind_start_conditions, ind_second_order_weights),cellfun(@squeeze,{Data.RobMonA4_sw.rel_err},'UniformOutput',false),'UniformOutput',false))';
+                RobMonA3_run_time(ind, 1 : step_number) = cell2mat({Data.RobMonA4_sw.run_time})';
+            end
         case {2,6,8}
             eval(sprintf('RobMonA%d_abs_err(ind, 1 : step_number +1)  = cell2mat({Data.RobMonA%d.abs_err})'';', version, version));
             eval(sprintf('RobMonA%d_rel_err(ind, 1 : step_number +1)  = cell2mat({Data.RobMonA%d.rel_err})'';', version, version));
@@ -78,7 +87,11 @@ for Batch_id = num_files : -1 : 1
 end
 
 file_name = fullfile(data_folder,sprintf('Compiled_%dsubjs_RM_%d.mat', num_subj_per_batch*num_files, version));
-save(file_name,  var_name);
+if exist(file_name, "file")
+    save(file_name,  var_name, '-append');
+else
+    save(file_name,  var_name);
+end
 fprintf('Saved data to: %s\n',file_name);
 
 end
