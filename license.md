@@ -1,7 +1,7 @@
 The copyrights of this software are owned by Duke University. As such, two licenses for this software are offered:
 
-    An open-source license under the GPLv2 license for non-commercial use.
-    A custom license with Duke University, for commercial use without the GPLv2 license restrictions.
+1. An open-source license under the GPLv2 license for non-commercial use.
+2. A custom license with Duke University, for commercial use without the GPLv2 license restrictions.
 
 As a recipient of this software, you may choose which license to receive the code under. Outside contributions to the Duke-owned code base cannot be accepted unless the contributor transfers the copyright to those changes over to Duke University.
 
