@@ -8,8 +8,8 @@ function response = virtstimulate(amplitude_SI, subject_parameters, noisefree)
 %
 %   amplitude_SI:       amplitude value, typically between 0 and 1
 %   subject_parameters:	subject, represented by its parameters
-%   noisefree:          logical, if true, result contains neither x nor
-%                       additive or mult. y noise
+%   noisefree:          (optional) logical, if true, result contains 
+%                       neither x nor additive or multiplicative y noise
 %
 %   (c) 2017, stefan.goetz@duke.edu, 
 %   2021, update by boshuo.wang@duke.edu

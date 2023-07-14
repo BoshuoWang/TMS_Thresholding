@@ -1,8 +1,8 @@
-%% Generate random 100 subjects and plot IO curves
+%% Generates random 100 subjects and plot IO curves
 
-rng('shuffle')
+rng('shuffle');
 stimamps = linspace(0, 1, 300);
-	
+
 figure('Color', 'w', 'Units', 'Normalized', 'Position', [0.1,0.1,0.7,0.7]);
 axes;
 ylim([1e-6, 1e-2]);
@@ -14,12 +14,12 @@ xlabel('Stimulation strength: percentage of maximum stimulator output (MSO)', 'I
 ylabel('MEP: $V_{\mathrm{PP}} \ (\mathrm{V})$','Interpreter', 'Latex', 'FontSize', 16);
 
 for icnt = 100 : -1 : 1
-    
+
     subject(icnt).parameters = virtualsubjectEIVGenerateSubject;
 
-	% Generate and plot IO curve for respective subject
-	MEPVpp = virtstimulate(stimamps, subject(icnt).parameters);
-        
+    % Generate and plot IO curve for respective subject
+    MEPVpp = virtstimulate(stimamps, subject(icnt).parameters);
+
     cla;
     plot(stimamps*100, MEPVpp, 'ok', 'MarkerFaceColor', 'w', 'MarkerSize', 6, 'LineWidth', 1)
     title(sprintf('Subject %d', 101-icnt), 'Interpreter', 'Latex', 'FontSize', 18)

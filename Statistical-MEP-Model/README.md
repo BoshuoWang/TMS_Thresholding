@@ -19,10 +19,12 @@ The model shows MEP features that were previously described in the literature an
 
 
 ## Files
-virtstimulate(myamplitudeSI, ActSubjectParameters)
+virtstimulate(amplitude_SI, subject_parameters, noisefree): Stimulates a subject with parameters subject_parameters, e.g., generated with virtualsubjectEIVGenerateSubject, with amplitude(s) amplitude_SI. The return value is a peak-to-peak amplitude value in Volts.
 
-virtualsubjectEIVGenerateSubject()
+virtualsubjectEIVGenerateSubject(): generates a virtual subject described by a number of parameters based on population statistics of those parameters. With these parameters virtstimulate can generate stimulus-response pairs for those specific subjects.
 
-gev_pdf(x, k, mu, sigma)
+gev_pdf(x, k, mu, sigma): evaluates the probability density function (pdf) of the generalized extreme value (GEV) distribution. Used by rand_gev().
 
-rand_gev(N, k, mu, sigma)
+rand_gev(N, k, mu, sigma): generates random numbers following a generalized extreme value disitrbution with parameters k, mu, and sigma. The return value is a matrix of size(N) independent values. Used by virtstimulate().
+
+SampleCode: Generates random 100 subjects and plot IO curves

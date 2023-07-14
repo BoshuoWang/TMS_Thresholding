@@ -21,7 +21,7 @@ function rand_GEV = randgev(N, k, mu, sigma)
 %   x = rand_gev(100, 1, 1, 1);
 %   hist(x(:))
 %
-%   (c) 2017, stefan.goetz@duke.edu, 
+%   (c) 2017, stefan.goetz@duke.edu,
 %   2021, update by boshuo.wang@duke.edu
 
 if (sigma == 0)
@@ -39,7 +39,7 @@ elseif (k < 0)
 elseif (k > 0)
     x_vec = mu + linspace(-1.0*sigma/k+eps, +150*sigma, x_num);
 end
- 
+
 % % %% for now, generate pdf for test values and integrate numerically
 % % pdf_vec = gevpdf(x_vec, k, mu, sigma);
 % % % eliminate any complex entries:
