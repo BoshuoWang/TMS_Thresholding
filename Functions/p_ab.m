@@ -1,6 +1,6 @@
 function pdf_ab = p_ab(t, s)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Probablity distribution of MLE threshold and slope parameters, based on
+%   Probablity distribution of MLE threshold and spread parameters, based on
 %   statistical data of virtual population (Subjects_25000.mat)
 %   (c) 2021, boshuo.wang@duke.edu, stefan.goetz@duke.edu, 
 

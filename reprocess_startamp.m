@@ -4,7 +4,7 @@ data_folder = 'DataStorage';
 if ~exist('Total_Subject_Count', 'var')
     Total_Subject_Count = 25e3;    % 25k
 end
-file_name = fullfile(data_folder, sprintf('Subjects_%d_reprocessed_v1.mat', Total_Subject_Count));
+file_name = fullfile(data_folder, sprintf('Subjects_%d_reprocessed.mat', Total_Subject_Count));
 load(file_name, 'Subjects', 'Total_Subject_Count', 'y_thresh');
 
 %%

@@ -43,19 +43,19 @@ if version <= 3                 % Single parameter MLE/MAP
     LB = t_min;                 % Lower bounds for threshold 
     UB = t_max;                 % Upper bounds for threshold
 else                            % Two-parameter MLE/MAP
-    LB = [t_min, s_min];        % Lower bounds for threshold and slope
-    UB = [t_max, s_max];        % Upper bounds for threshold and slope
+    LB = [t_min, s_min];        % Lower bounds for threshold and spread
+    UB = [t_max, s_max];        % Upper bounds for threshold and spread
 end
 
 if version == 1                 % Amplitude list for explicit evaluation
     possible_amplitude_list = t_min : t_step : t_max;
 end
-if version == 4                 % Grid of amplitudes and slopes for explicit evaluation
+if version == 4                 % Grid of amplitudes and spreads for explicit evaluation
     possible_amplitude_list = t_min : t_step : t_max;
     MLE_grid_size = round(log10(s_max) - log10(s_min)) * 50;     % 50 points per decade, 100 points total
     tmp_vec = logspace(log10(s_min), log10(s_max), MLE_grid_size*2+1);	
-    possible_slope_list = tmp_vec(2:2:end-1);         % Sample at center of intervals
-    [possible_amplitude_grid, possible_slope_grid] = ndgrid(possible_amplitude_list, possible_slope_list);
+    possible_spread_list = tmp_vec(2:2:end-1);         % Sample at center of intervals
+    [possible_amplitude_grid, possible_spread_grid] = ndgrid(possible_amplitude_list, possible_spread_list);
 end
 
 for step_cnt = (1 : step_number) + 2    % offset by 2 to include default samples
@@ -98,7 +98,7 @@ for step_cnt = (1 : step_number) + 2    % offset by 2 to include default samples
             end
             thresh_est(step_cnt) = theta_min;
         case {4}                        % Version 4: explicit likelihood evaluation, 2 parameters
-            explicit_likelihood = fun_min(possible_amplitude_grid, possible_slope_grid);
+            explicit_likelihood = fun_min(possible_amplitude_grid, possible_spread_grid);
             [ampl_inds, ~] = find( explicit_likelihood <= min(explicit_likelihood, [],  'all'));    % maxima can be a whole list of values
             thresh_est(step_cnt) = mean(possible_amplitude_list( ampl_inds ));                      % if several thresholds have same likelihood => take mean
         case {5,6,7,8}                  % Version 5,6,7,8: direct maximization, 2 parameters
