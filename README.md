@@ -10,11 +10,12 @@ batch_MLE.m, compile_MLE_ver.m, & compile_Bayesian.m: submit jobs running MLE/MA
 batch_RM.m, compile_RM_all.m, compile_RM_nonparam.m, & compile_RM_param.m: submit jobs running stochastic root-finding methods (Robbins-Monro) on cluster and compile results from different batches.
 
 Folder "Statistical-MEP-Model" is updated version of code from repository: https://github.com/sgoetzduke/Statistical-MEP-Model
-	For details, see readme within folder.
+        For details, see readme within folder.
 
 Folder "Functions" contains TMS thresholding methods and supporting functions and data.
+
 	BayesianAdaptiveEstimation.m: Bayesian methods.
-	fsolve_diffser.m: used for finding point on noiseless response curve.
+ 	fsolve_diffser.m: used for finding point on noiseless response curve.
 	generateLUT.m: generate lookup table for BayesianAdaptiveEstimation.
 	IFCNmethod.m: relative frequency methods.
 	loglikelyhood.m: calculate log-likelihood.
@@ -28,13 +29,15 @@ Folder "Functions" contains TMS thresholding methods and supporting functions an
 	StochasticApproximation.m stochastic root-finding methods (all variants).
 	
 Folder "DataStorage" contains .mat file (parameters of 25000 virtual subjects) and stores output data of TMS thresholding methods.
+
 	Subjects_25000.mat: subject parameters generated for v36 using GenerateSubjects.m. Threshold defined as amplitude generating 50 uV MEP using noiseless response model. Starting amplitude defined as amplitude generating 500 uV MEP using noiseless response model.
 	Subjects_25000_reprocessed.mat: same subject parameters, with threshold and starting amplitude reprocessed for v37 using reGenerateSubjects.m, compile_reSubjects.m,and reprocess_startamp.m. Threshold defined as amplitude generating suprathreshold MEP (greater or equal than 50 uV) with 50% probablity. Starting amplitude defined as amplitude generating suprathreshold MEP with at least 95% probablity (90% probablity version available). Contains additional information.
 
 
 Example slurm files are provided to run TMS thresholding methods on a cluster. Modify paths and parameters as needed.
 
-For running individual methods, load Subjects_25000_reprocessed.mat, select one element of the Subjects variable, and setup params variable (see e.g., batch_MLE.m for details). Run function for specific method with arguments (params, version). Details on versions can be found within the function for a specific method. 
+For running individual methods, load Subjects_25000_reprocessed.mat, select one element of the Subjects variable, and setup params variable (see e.g., batch_MLE.m for details). Run function for specific method with arguments (params, version). Details on versions can be found within the function for a specific method.
+
 -------------------------------------------------------------------------------------------------------------------------
 The copyrights of this software are owned by Duke University. As such, two licenses for this software are offered:
 
