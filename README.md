@@ -32,7 +32,7 @@ Folder "Functions" contains TMS thresholding methods and supporting functions an
 Folder "DataStorage" contains .mat file (parameters of 25000 virtual subjects) and stores output data of TMS thresholding methods.
 
 	Subjects_25000.mat: subject parameters generated for v36 using GenerateSubjects.m. Threshold defined as amplitude generating 50 uV MEP using noiseless response model. Starting amplitude defined as amplitude generating 500 uV MEP using noiseless response model.
-	Subjects_25000_reprocessed.mat: same subject parameters, with threshold and starting amplitude reprocessed for v37 using reGenerateSubjects.m, compile_reSubjects.m,and reprocess_startamp.m. Threshold defined as amplitude generating suprathreshold MEP (greater or equal than 50 uV) with 50% probablity. Starting amplitude defined as amplitude generating suprathreshold MEP with at least 95% probablity (90% probablity version available). Contains additional information.
+	Subjects_25000_reprocessed.mat: same subject parameters, with threshold and starting amplitude reprocessed for v37 using batch_reSubject.m, compile_reSubjects.m,and reprocess_startamp.m. Threshold defined as amplitude generating suprathreshold MEP (greater or equal than 50 uV) with 50% probablity. Starting amplitude defined as amplitude generating suprathreshold MEP with at least 95% probablity (90% probablity version available). Contains additional information.
 
 
 Example slurm files are provided to run TMS thresholding methods on a cluster. Modify paths and parameters as needed.
