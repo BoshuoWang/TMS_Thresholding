@@ -39,6 +39,8 @@ Example slurm files are provided to run TMS thresholding methods on a cluster. M
 
 For running individual methods, load Subjects_25000_reprocessed.mat, select one element of the Subjects variable, and setup params variable (see e.g., batch_MLE.m for details). Run function for specific method with arguments (params, version). Details on versions can be found within the function for a specific method.
 
+Please email boshuo.wang@duke.edu if you have questions or feedback regarding the code in this repository.
+
 -------------------------------------------------------------------------------------------------------------------------
 The copyrights of this software are owned by Duke University. As such, two licenses for this software are offered:
 
