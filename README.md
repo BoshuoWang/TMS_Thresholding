@@ -4,10 +4,11 @@ Repository of MATLAB code related to manuscript: B.Wang, A.V.Peterchev, and S.M.
 bioRxiv preprint DOI https://doi.org/10.1101/2022.06.26.495134
 
 Functions:
-batch_Bayesian.m & compile_Bayesian.m: submit jobs running Bayesian methods on cluster and compile results from different batches.
-batch_IFCN_MN.m & compile_IFCN_MN.m: submit jobs running IFCN relative frequency and Mills-Nithi methods on cluster and compile results from different batches. 
-batch_MLE.m, compile_MLE_ver.m, & compile_Bayesian.m: submit jobs running MLE/MAP/Bayesian methods on cluster and compile results from different batches.
-batch_RM.m, compile_RM_all.m, compile_RM_nonparam.m, & compile_RM_param.m: submit jobs running stochastic root-finding methods (Robbins-Monro) on cluster and compile results from different batches.
+
+	batch_Bayesian.m & compile_Bayesian.m: submit jobs running Bayesian methods on cluster and compile results from different batches.
+	batch_IFCN_MN.m & compile_IFCN_MN.m: submit jobs running IFCN relative frequency and Mills-Nithi methods on cluster and compile results from different batches. 
+	batch_MLE.m, compile_MLE_ver.m, & compile_Bayesian.m: submit jobs running MLE/MAP/Bayesian methods on cluster and compile results from different batches.
+	batch_RM.m, compile_RM_all.m, compile_RM_nonparam.m, & compile_RM_param.m: submit jobs running stochastic root-finding methods (Robbins-Monro) on cluster and compile results from different batches.
 
 Folder "Statistical-MEP-Model" is updated version of code from repository: https://github.com/sgoetzduke/Statistical-MEP-Model
         For details, see readme within folder.
